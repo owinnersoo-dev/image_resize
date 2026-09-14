@@ -1,352 +1,59 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Manual Therapy Clinic 3D</title>
-<style>
-  *{box-sizing:border-box}
-  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#dfeaf2;font-family:Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-  #gameWrap{position:relative;width:100%;height:100%}
-  canvas{display:block;width:100%;height:100%;touch-action:none}
-  .hud{
-    position:absolute;left:14px;top:14px;z-index:4;
-    background:rgba(17,27,39,.78);color:#fff;border:1px solid rgba(255,255,255,.18);
-    border-radius:16px;padding:12px 14px;backdrop-filter:blur(8px);
-    min-width:210px;box-shadow:0 10px 30px rgba(0,0,0,.18)
-  }
-  .hud b{font-size:14px}
-  .hud .big{font-size:26px;font-weight:900;margin-top:4px}
-  .hud .small{font-size:12px;opacity:.82;margin-top:4px;line-height:1.45}
-  .panel{
-    position:absolute;right:14px;top:14px;z-index:4;width:min(330px,42vw);
-    background:rgba(255,255,255,.92);border:1px solid rgba(0,0,0,.08);
-    border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.14)
-  }
-  .panel h2{font-size:16px;margin:0 0 8px}
-  .patient{font-size:13px;line-height:1.5;color:#24303b}
-  .status{margin-top:9px;padding:9px 10px;border-radius:12px;background:#eef4f8;font-size:12px}
-  .choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-  button{
-    appearance:none;border:none;border-radius:12px;padding:10px 8px;font-weight:800;
-    background:#e9eff4;color:#20303f;cursor:pointer
-  }
-  button:hover{filter:brightness(.98)}
-  button.active{outline:3px solid rgba(32,116,255,.25);background:#dbe9ff}
-  button.action{grid-column:1/-1;background:#1f6feb;color:#fff}
-  button.reset{background:#fff0f0;color:#a13737}
-  .footer{
-    position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
-    z-index:4;background:rgba(17,27,39,.74);color:#fff;padding:10px 14px;border-radius:14px;
-    font-size:12px;backdrop-filter:blur(8px);text-align:center;max-width:80vw
-  }
-  .toast{
-    position:absolute;left:50%;top:16%;transform:translateX(-50%);
-    z-index:5;color:#fff;font-weight:900;font-size:clamp(22px,4vw,46px);
-    text-shadow:0 3px 12px rgba(0,0,0,.3);opacity:0;transition:.25s
-  }
-  @media(max-width:760px){
-    .panel{top:auto;bottom:84px;right:10px;left:10px;width:auto;max-height:42vh;overflow:auto}
-    .hud{left:10px;top:10px;min-width:170px}
-    .footer{bottom:12px;font-size:11px;width:88vw}
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PNG/JPG → JPEG 변환 · 용량 줄이기</title>
+  <style>
+    :root{--bg:#f4f7fb;--panel:#fff;--ink:#17202a;--muted:#66788a;--line:#d9e2ec;--primary:#2563eb;--primary-dark:#1d4ed8;--ok:#16803c;--warn:#a16207;--danger:#b42318;--shadow:0 18px 50px rgba(31,56,88,.10)}
+    *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,#eef4fb 0,#f8fafc 100%);min-height:100vh}.wrap{width:min(1100px,calc(100% - 28px));margin:32px auto 56px}header{display:flex;gap:18px;justify-content:space-between;align-items:flex-end;margin-bottom:20px}h1{margin:0;font-size:clamp(30px,5vw,48px);letter-spacing:-.04em;line-height:1.15}.sub{margin:10px 0 0;color:var(--muted);font-size:16px}.badge{white-space:nowrap;padding:8px 12px;border-radius:999px;background:#eaf1ff;color:#214fa8;font-weight:800;font-size:13px}.app{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}.top{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;padding:26px;border-bottom:1px solid var(--line)}.drop{min-height:260px;border:2px dashed #9fb5cf;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;background:#f8fbff;transition:.2s ease;cursor:pointer}.drop.drag{border-color:var(--primary);background:#edf4ff;transform:translateY(-1px)}.drop .icon{width:74px;height:74px;display:grid;place-items:center;border-radius:22px;background:#e8f0ff;font-size:34px;margin-bottom:14px}.drop strong{font-size:20px}.drop span{color:var(--muted);margin-top:6px}input[type=file]{display:none}.btn{border:0;border-radius:12px;padding:12px 16px;font:inherit;font-weight:800;cursor:pointer;transition:.15s ease}.btn:active{transform:translateY(1px)}.btn.primary{background:var(--primary);color:#fff}.btn.primary:hover{background:var(--primary-dark)}.btn.ghost{background:#eef3f8;color:#2a4057}.btn.danger{background:#fff0ef;color:var(--danger)}.settings{border:1px solid var(--line);border-radius:18px;padding:20px;background:#fff}.settings h2{margin:0 0 18px;font-size:20px}.field{margin-bottom:18px}.label{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;font-weight:800}.hint{font-size:13px;color:var(--muted);font-weight:500}input[type=range]{width:100%}input[type=text],select{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;background:#fff}input[type=color]{width:48px;height:36px;padding:3px;border:1px solid var(--line);border-radius:9px;background:#fff}.inline{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}.actions{display:flex;flex-wrap:wrap;gap:10px;padding:18px 26px;border-bottom:1px solid var(--line);background:#fbfcfe}.status{margin-left:auto;display:flex;align-items:center;color:var(--muted);font-size:14px}.list{padding:10px 26px 26px}.empty{padding:34px 16px;text-align:center;color:var(--muted)}.item{display:grid;grid-template-columns:84px 1fr auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid #edf1f5}.thumb{width:84px;height:84px;object-fit:cover;border-radius:12px;border:1px solid var(--line);background:#f0f2f5}.meta strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:650px}.meta small{display:block;color:var(--muted);margin-top:4px}.state{margin-top:7px;font-size:13px;font-weight:800}.state.ready{color:var(--warn)}.state.done{color:var(--ok)}.state.error{color:var(--danger)}.item-actions{display:flex;gap:8px}.mini{border:0;border-radius:9px;padding:9px 11px;cursor:pointer;font-weight:800;background:#eef3f8;color:#2a4057}.mini.download{background:#e9f7ee;color:#176c36}.notice{margin-top:16px;padding:14px 16px;border:1px solid #d8e5f4;border-radius:14px;background:#f5f9ff;color:#49647f;font-size:14px}footer{margin-top:14px;color:var(--muted);font-size:13px;text-align:center}@media(max-width:800px){.top{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}.item{grid-template-columns:68px 1fr}.thumb{width:68px;height:68px}.item-actions{grid-column:1/-1}.status{width:100%;margin-left:0}}
+  </style>
+  <meta name="theme-color" content="#ffffff">
 </head>
 <body>
-<div id="gameWrap">
-  <canvas id="c"></canvas>
-
-  <div class="hud">
-    <b>MANUAL THERAPY CLINIC</b>
-    <div class="big">점수 <span id="score">0</span></div>
-    <div class="small">환자 <span id="caseNum">1</span> / 5<br>신뢰도 <span id="trust">100</span>%</div>
+<div class="wrap">
+  <header><div><h1>PNG/JPG → JPEG 변환 · 용량 줄이기</h1><p class="sub">PNG 변환과 JPG/JPEG 재압축을 브라우저 안에서 처리합니다. 파일은 외부 서버로 전송되지 않습니다.</p></div><div class="badge">설치 없이 실행</div></header>
+  <div class="app">
+    <section class="top">
+      <label class="drop" id="dropZone" for="fileInput"><div class="icon">🖼️</div><strong>PNG/JPG 파일을 끌어놓으세요</strong><span>또는 클릭해서 PNG · JPG · JPEG 파일을 여러 장 선택하세요</span><input id="fileInput" type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" multiple /></label>
+      <aside class="settings">
+        <h2>변환 · 압축 설정</h2>
+        <div class="field"><div class="label"><span>JPEG 품질 / 압축률</span><span id="qualityText">85%</span></div><input id="quality" type="range" min="30" max="100" value="85" /><div class="hint">용량 줄이기: 70~85% · 화질 우선: 90~95%</div></div><div class="field"><div class="label"><span>이미지 크기</span><span id="resizeText">100%</span></div><input id="resize" type="range" min="25" max="100" step="5" value="100" /><div class="hint">해상도를 줄이면 JPG 용량을 더 크게 줄일 수 있습니다.</div></div>
+        <div class="field"><div class="label"><span>투명 영역 배경색</span></div><div class="inline"><select id="backgroundPreset"><option value="#ffffff">흰색</option><option value="#000000">검정색</option><option value="#f5f5f5">연한 회색</option><option value="custom">직접 선택</option></select><input id="backgroundColor" type="color" value="#ffffff" /></div></div>
+        <div class="field"><div class="label"><span>파일명 뒤에 붙일 문구</span></div><input id="suffix" type="text" value="_compressed" placeholder="_compressed" /></div>
+        <div class="field"><div class="label"><span>출력 확장자</span></div><select id="extension"><option value="jpg">.jpg</option><option value="jpeg">.jpeg</option></select></div>
+      </aside>
+    </section>
+    <div class="actions"><button class="btn primary" id="convertAll">전체 변환</button><button class="btn ghost" id="downloadAll" disabled>변환 완료 파일 모두 저장</button><button class="btn danger" id="clearAll">목록 비우기</button><div class="status" id="status">선택된 파일 없음</div></div>
+    <section class="list" id="fileList"><div class="empty">아직 선택된 PNG 파일이 없습니다.</div></section>
   </div>
-
-  <div class="panel">
-    <h2>환자 평가</h2>
-    <div class="patient" id="patientText"></div>
-    <div class="status" id="statusText">치료 부위를 선택하세요.</div>
-
-    <div class="choices" id="regionBtns">
-      <button data-region="neck">목</button>
-      <button data-region="shoulder">어깨</button>
-      <button data-region="lowback">허리</button>
-      <button data-region="knee">무릎</button>
-    </div>
-
-    <div class="choices" id="treatBtns">
-      <button data-treat="mob">관절가동술</button>
-      <button data-treat="mfr">연부조직 이완</button>
-      <button data-treat="exercise">운동치료</button>
-      <button data-treat="education">교육/자세교정</button>
-      <button class="action" id="applyBtn">선택한 치료 시행</button>
-      <button class="reset" id="resetBtn">게임 재시작</button>
-    </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
-
-  <div class="footer">
-    마우스/손가락 드래그로 치료실 시점을 움직여 보세요 · 게임형 교육 시뮬레이션이며 실제 진료 지침이 아닙니다.
-  </div>
+  <div class="notice">PNG의 투명 부분은 JPEG에서 지원되지 않아 선택한 배경색으로 채워집니다. JPG/JPEG는 같은 형식으로 다시 저장하면서 품질과 해상도를 낮춰 용량을 줄일 수 있습니다.</div>
+  <footer>단일 HTML 파일 · 오프라인 사용 가능 · 브라우저 내부 처리</footer>
 </div>
-
 <script>
-const canvas=document.getElementById('c');
-const ctx=canvas.getContext('2d');
-let W=0,H=0,DPR=1;
-function resize(){
-  DPR=Math.min(devicePixelRatio||1,2);
-  W=innerWidth;H=innerHeight;
-  canvas.width=W*DPR;canvas.height=H*DPR;
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-}
-addEventListener('resize',resize); resize();
-
-let yaw=0,pitch=0,drag=false,lastX=0,lastY=0;
-canvas.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
-canvas.addEventListener('pointermove',e=>{
-  if(!drag)return;
-  yaw+=(e.clientX-lastX)*0.004;
-  pitch+=(e.clientY-lastY)*0.002;
-  pitch=Math.max(-0.18,Math.min(0.16,pitch));
-  lastX=e.clientX;lastY=e.clientY;
-});
-canvas.addEventListener('pointerup',()=>drag=false);
-canvas.addEventListener('pointercancel',()=>drag=false);
-
-const cases=[
- {region:'shoulder',name:'김OO',desc:'오른쪽 어깨를 들어 올릴 때 통증. 야간통은 거의 없고, 움직임 끝범위에서 뻣뻣함을 호소.',best:['mob','exercise']},
- {region:'lowback',name:'박OO',desc:'오래 앉은 뒤 허리 뻐근함. 다리 저림은 없고, 자세 변화에 따라 증상이 달라짐.',best:['education','exercise']},
- {region:'neck',name:'이OO',desc:'컴퓨터 작업 후 목과 견갑대 긴장. 팔 저림은 없고 휴식하면 호전됨.',best:['mfr','education']},
- {region:'knee',name:'최OO',desc:'수술 후 회복 단계의 무릎 뻣뻣함. 통증 범위 안에서 움직임 회복과 근기능 향상이 목표.',best:['exercise','mob']},
- {region:'shoulder',name:'정OO',desc:'가벼운 어깨 불편감과 움직임 두려움. 급성 외상은 없고 기능 회복이 주 목표.',best:['education','exercise']}
-];
-
-let idx=0,score=0,trust=100,selectedRegion='',selectedTreat='';
-const patientText=document.getElementById('patientText');
-const statusText=document.getElementById('statusText');
-const scoreEl=document.getElementById('score');
-const trustEl=document.getElementById('trust');
-const caseNumEl=document.getElementById('caseNum');
-const toast=document.getElementById('toast');
-
-function loadCase(){
-  const c=cases[idx];
-  patientText.innerHTML=`<b>${c.name}</b><br>${c.desc}`;
-  statusText.textContent='치료 부위를 선택하세요.';
-  selectedRegion='';selectedTreat='';
-  document.querySelectorAll('button[data-region],button[data-treat]').forEach(b=>b.classList.remove('active'));
-  caseNumEl.textContent=idx+1;
-}
-loadCase();
-
-document.querySelectorAll('button[data-region]').forEach(b=>{
-  b.onclick=()=>{
-    selectedRegion=b.dataset.region;
-    document.querySelectorAll('button[data-region]').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    statusText.textContent='이제 치료 방법을 선택하세요.';
-  };
-});
-document.querySelectorAll('button[data-treat]').forEach(b=>{
-  b.onclick=()=>{
-    selectedTreat=b.dataset.treat;
-    document.querySelectorAll('button[data-treat]').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-  };
-});
-
-function showToast(text){
-  toast.textContent=text;toast.style.opacity='1';
-  setTimeout(()=>toast.style.opacity='0',900);
-}
-
-document.getElementById('applyBtn').onclick=()=>{
-  if(!selectedRegion||!selectedTreat){statusText.textContent='부위와 치료 방법을 모두 선택하세요.';return}
-  const c=cases[idx];
-  let delta=0;
-  if(selectedRegion===c.region) delta+=20; else delta-=15;
-  if(c.best.includes(selectedTreat)) delta+=25; else delta-=10;
-
-  if(delta>0){
-    score+=delta;
-    statusText.textContent='환자 반응이 좋습니다. 적절한 판단이었습니다.';
-    showToast('GOOD +'+delta);
-  }else{
-    trust=Math.max(0,trust-10);
-    score=Math.max(0,score+delta);
-    statusText.textContent='환자 반응이 좋지 않습니다. 평가와 치료 선택을 다시 생각해보세요.';
-    showToast('CHECK AGAIN');
-  }
-  scoreEl.textContent=score;trustEl.textContent=trust;
-
-  setTimeout(()=>{
-    idx++;
-    if(idx>=cases.length){
-      idx=0;
-      const final=score;
-      alert(`진료 종료! 최종 점수: ${final}점`);
-      score=0;trust=100;
-      scoreEl.textContent=score;trustEl.textContent=trust;
-    }
-    loadCase();
-  },850);
-};
-
-document.getElementById('resetBtn').onclick=()=>{
-  idx=0;score=0;trust=100;selectedRegion='';selectedTreat='';
-  scoreEl.textContent=0;trustEl.textContent=100;loadCase();
-};
-
-function drawRoom(){
-  const cx=W/2 + Math.sin(yaw)*W*0.08;
-  const horizon=H*0.34 + pitch*H*0.7;
-
-  // ceiling
-  ctx.fillStyle='#f6fafc';
-  ctx.fillRect(0,0,W,horizon);
-
-  // back wall
-  const wall=ctx.createLinearGradient(0,horizon,0,H*.73);
-  wall.addColorStop(0,'#edf4f8'); wall.addColorStop(1,'#d8e5ec');
-  ctx.fillStyle=wall;
-  ctx.fillRect(0,horizon,W,H*.42);
-
-  // floor with perspective
-  const floorTop=H*.70;
-  const fg=ctx.createLinearGradient(0,floorTop,0,H);
-  fg.addColorStop(0,'#c9d7de');fg.addColorStop(1,'#9fb2bc');
-  ctx.fillStyle=fg;ctx.fillRect(0,floorTop,W,H-floorTop);
-
-  ctx.strokeStyle='rgba(90,110,120,.22)';
-  ctx.lineWidth=1;
-  for(let i=-8;i<=8;i++){
-    ctx.beginPath();ctx.moveTo(cx,horizon+80);ctx.lineTo(cx+i*W*.12,H);ctx.stroke();
-  }
-  for(let j=0;j<10;j++){
-    const p=j/10;
-    const y=floorTop + Math.pow(p,1.55)*(H-floorTop);
-    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
-  }
-
-  // window
-  const wx=W*.08+Math.sin(yaw)*18, wy=horizon+30;
-  ctx.fillStyle='#bde8ff';ctx.fillRect(wx,wy,W*.22,H*.20);
-  ctx.strokeStyle='#ffffff';ctx.lineWidth=5;ctx.strokeRect(wx,wy,W*.22,H*.20);
-  ctx.beginPath();ctx.moveTo(wx+W*.11,wy);ctx.lineTo(wx+W*.11,wy+H*.20);
-  ctx.moveTo(wx,wy+H*.10);ctx.lineTo(wx+W*.22,wy+H*.10);ctx.stroke();
-
-  // cabinet
-  const cabX=W*.76+Math.sin(yaw)*20, cabY=horizon+48;
-  ctx.fillStyle='#f8fbfc';ctx.fillRect(cabX,cabY,W*.13,H*.24);
-  ctx.fillStyle='#bfd0d9';
-  for(let i=0;i<3;i++)ctx.fillRect(cabX+8,cabY+12+i*H*.07,W*.13-16,H*.045);
-
-  // treatment table (fake 3D)
-  const tx=cx-W*.12, ty=H*.57;
-  const tw=Math.min(W*.44,520), th=H*.13;
-  ctx.fillStyle='#397fbf';
-  ctx.beginPath();
-  ctx.moveTo(tx-tw*.42,ty);
-  ctx.lineTo(tx+tw*.34,ty-H*.035);
-  ctx.lineTo(tx+tw*.48,ty+th*.60);
-  ctx.lineTo(tx-tw*.30,ty+th*.85);
-  ctx.closePath();ctx.fill();
-
-  // table legs
-  ctx.fillStyle='#5a6871';
-  ctx.fillRect(tx-tw*.26,ty+th*.62,12,H*.18);
-  ctx.fillRect(tx+tw*.31,ty+th*.52,12,H*.18);
-
-  drawPatient(tx,ty,tw,th);
-  drawTherapist(tx+tw*.18,ty+th*.1);
-}
-
-function drawPatient(tx,ty,tw,th){
-  ctx.save();
-  // body
-  ctx.translate(tx,ty-8);
-  ctx.rotate(-0.03);
-  ctx.fillStyle='#f3c7a5';
-  ctx.beginPath();ctx.arc(-tw*.27,-12,22,0,Math.PI*2);ctx.fill();
-
-  ctx.fillStyle='#eef3f6';
-  ctx.beginPath();
-  ctx.moveTo(-tw*.22,-22);ctx.lineTo(tw*.16,-30);ctx.lineTo(tw*.24,15);ctx.lineTo(-tw*.16,24);ctx.closePath();ctx.fill();
-
-  ctx.fillStyle='#a9b9c5';
-  ctx.beginPath();ctx.moveTo(tw*.16,-30);ctx.lineTo(tw*.38,-26);ctx.lineTo(tw*.41,0);ctx.lineTo(tw*.24,15);ctx.closePath();ctx.fill();
-
-  // arm
-  ctx.strokeStyle='#f3c7a5';ctx.lineWidth=13;ctx.lineCap='round';
-  ctx.beginPath();ctx.moveTo(-tw*.04,-5);ctx.lineTo(tw*.12,14);ctx.stroke();
-  ctx.restore();
-}
-
-function drawTherapist(x,y){
-  ctx.save();ctx.translate(x,y);
-  const s=Math.max(.75,Math.min(1.2,W/1100));
-  ctx.scale(s,s);
-
-  // shadow
-  ctx.fillStyle='rgba(0,0,0,.18)';
-  ctx.beginPath();ctx.ellipse(0,138,45,13,0,0,Math.PI*2);ctx.fill();
-
-  // legs
-  ctx.fillStyle='#243545';ctx.fillRect(-28,55,19,78);ctx.fillRect(9,55,19,78);
-
-  // torso
-  ctx.fillStyle='#e8f4ff';
-  ctx.beginPath();ctx.roundRect(-42,-18,84,82,18);ctx.fill();
-
-  // head
-  ctx.fillStyle='#efc19d';ctx.beginPath();ctx.arc(0,-52,28,0,Math.PI*2);ctx.fill();
-
-  // hair
-  ctx.fillStyle='#333';ctx.beginPath();ctx.arc(0,-59,28,Math.PI,Math.PI*2);ctx.fill();
-
-  // arms/hands hovering over patient
-  ctx.strokeStyle='#efc19d';ctx.lineWidth=13;ctx.lineCap='round';
-  ctx.beginPath();ctx.moveTo(-33,2);ctx.lineTo(-62,30);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(33,2);ctx.lineTo(58,29);ctx.stroke();
-
-  ctx.restore();
-}
-
-function drawSelectedZone(){
-  const c=cases[idx];
-  const labels={
-    neck:['목',W*.45,H*.50],
-    shoulder:['어깨',W*.49,H*.54],
-    lowback:['허리',W*.56,H*.57],
-    knee:['무릎',W*.63,H*.60]
-  };
-  const [label,x,y]=labels[c.region];
-  ctx.save();
-  ctx.fillStyle='rgba(255,88,88,.20)';
-  ctx.strokeStyle='rgba(255,70,70,.85)';
-  ctx.lineWidth=3;
-  ctx.beginPath();ctx.arc(x+Math.sin(yaw)*20,y,26,0,Math.PI*2);ctx.fill();ctx.stroke();
-  ctx.fillStyle='#b62929';ctx.font='700 12px Arial';
-  ctx.fillText(label,x-10,y-34);
-  ctx.restore();
-}
-
-function render(){
-  ctx.clearRect(0,0,W,H);
-  drawRoom();
-  drawSelectedZone();
-
-  // soft vignette
-  const g=ctx.createRadialGradient(W/2,H*.55,Math.min(W,H)*.15,W/2,H*.55,Math.max(W,H)*.8);
-  g.addColorStop(0,'rgba(255,255,255,0)');
-  g.addColorStop(1,'rgba(30,50,70,.18)');
-  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-
-  requestAnimationFrame(render);
-}
-render();
+(() => {
+  const fileInput=document.getElementById('fileInput'),dropZone=document.getElementById('dropZone'),quality=document.getElementById('quality'),qualityText=document.getElementById('qualityText'),resize=document.getElementById('resize'),resizeText=document.getElementById('resizeText'),backgroundPreset=document.getElementById('backgroundPreset'),backgroundColor=document.getElementById('backgroundColor'),suffix=document.getElementById('suffix'),extension=document.getElementById('extension'),convertAll=document.getElementById('convertAll'),downloadAll=document.getElementById('downloadAll'),clearAll=document.getElementById('clearAll'),fileList=document.getElementById('fileList'),status=document.getElementById('status');
+  let items=[];
+  quality.addEventListener('input',()=>{qualityText.textContent=quality.value+'%';scheduleEstimate()});resize.addEventListener('input',()=>{resizeText.textContent=resize.value+'%';scheduleEstimate()});
+  backgroundPreset.addEventListener('change',()=>{if(backgroundPreset.value!=='custom')backgroundColor.value=backgroundPreset.value});
+  backgroundColor.addEventListener('input',()=>backgroundPreset.value='custom');
+  ['dragenter','dragover'].forEach(t=>dropZone.addEventListener(t,e=>{e.preventDefault();dropZone.classList.add('drag')}));
+  ['dragleave','drop'].forEach(t=>dropZone.addEventListener(t,e=>{e.preventDefault();dropZone.classList.remove('drag')}));
+  dropZone.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+  fileInput.addEventListener('change',e=>{addFiles(e.target.files);fileInput.value=''});
+  function addFiles(input){const files=[...input].filter(f=>/image\/(png|jpeg)/i.test(f.type)||/\.(png|jpe?g)$/i.test(f.name));if(!files.length){alert('PNG, JPG, JPEG 파일만 선택할 수 있습니다.');return}for(const file of files){const id=crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random());items.push({id,file,preview:URL.createObjectURL(file),outputUrl:null,outputBlob:null,estimatedSize:null,estimating:false,state:'ready',message:'변환 대기'})}render();scheduleEstimate()}
+  function render(){if(!items.length){fileList.innerHTML='<div class="empty">아직 선택된 PNG 파일이 없습니다.</div>';status.textContent='선택된 파일 없음';downloadAll.disabled=true;return}fileList.innerHTML=items.map(item=>`<div class="item" data-id="${item.id}"><img class="thumb" src="${item.preview}" alt=""><div class="meta"><strong title="${escapeHtml(item.file.name)}">${escapeHtml(item.file.name)}</strong><small>원본 ${formatBytes(item.file.size)}${item.outputBlob?` → 결과 ${formatBytes(item.outputBlob.size)} · ${formatReduction(item.file.size,item.outputBlob.size)}`:item.estimating?' → 예상 계산 중...':item.estimatedSize!=null?` → 예상 ${formatBytes(item.estimatedSize)} · ${formatReduction(item.file.size,item.estimatedSize)}`:''}</small><div class="state ${item.state}">${item.message}</div></div><div class="item-actions">${item.outputUrl?'<button class="mini download" data-action="download">저장</button>':''}<button class="mini" data-action="remove">삭제</button></div></div>`).join('');const done=items.filter(x=>x.state==='done').length;const totalOriginal=items.reduce((sum,x)=>sum+x.file.size,0);const totalEstimated=items.reduce((sum,x)=>sum+(x.outputBlob?x.outputBlob.size:(x.estimatedSize??0)),0);const estimatedReady=items.every(x=>x.outputBlob||x.estimatedSize!=null);status.textContent=`${items.length}개 선택 · ${done}개 변환 완료${estimatedReady?` · 예상 전체 ${formatBytes(totalOriginal)} → ${formatBytes(totalEstimated)}`:''}`;downloadAll.disabled=done===0;fileList.querySelectorAll('.item').forEach(row=>{const id=row.dataset.id;row.querySelector('[data-action="remove"]').addEventListener('click',()=>removeItem(id));const dl=row.querySelector('[data-action="download"]');if(dl)dl.addEventListener('click',()=>downloadItem(id))})}
+  async function convertItem(item){item.state='ready';item.message='변환 중...';render();try{const bitmap=await createImageBitmap(item.file),canvas=document.createElement('canvas');const scale=Number(resize.value)/100;canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));const ctx=canvas.getContext('2d',{alpha:false});ctx.fillStyle=backgroundColor.value;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('JPEG 생성 실패')),'image/jpeg',Number(quality.value)/100));if(item.outputUrl)URL.revokeObjectURL(item.outputUrl);item.outputBlob=blob;item.outputUrl=URL.createObjectURL(blob);item.estimatedSize=blob.size;item.estimating=false;item.state='done';item.message=`완료 · ${formatReduction(item.file.size,blob.size)}`}catch(err){item.state='error';item.message='변환 실패: '+(err.message||'알 수 없는 오류')}render()}
+  convertAll.addEventListener('click',async()=>{if(!items.length){alert('먼저 PNG 파일을 선택하세요.');return}convertAll.disabled=true;clearAll.disabled=true;for(const item of items)await convertItem(item);convertAll.disabled=false;clearAll.disabled=false});
+  function outputName(name){const base=name.replace(/\.(png|jpe?g)$/i,'');return `${base}${suffix.value||''}.${extension.value}`}
+  function downloadItem(id){const item=items.find(x=>x.id===id);if(!item||!item.outputUrl)return;const a=document.createElement('a');a.href=item.outputUrl;a.download=outputName(item.file.name);document.body.appendChild(a);a.click();a.remove()}
+  downloadAll.addEventListener('click',async()=>{for(const item of items.filter(x=>x.outputUrl)){downloadItem(item.id);await new Promise(r=>setTimeout(r,220))}});
+  function removeItem(id){const i=items.findIndex(x=>x.id===id);if(i<0)return;const item=items[i];URL.revokeObjectURL(item.preview);if(item.outputUrl)URL.revokeObjectURL(item.outputUrl);items.splice(i,1);render()}
+  clearAll.addEventListener('click',()=>{for(const item of items){URL.revokeObjectURL(item.preview);if(item.outputUrl)URL.revokeObjectURL(item.outputUrl)}items=[];render()});
+  function formatBytes(bytes){if(bytes===0)return'0 B';const units=['B','KB','MB','GB'],i=Math.floor(Math.log(bytes)/Math.log(1024));return`${(bytes/Math.pow(1024,i)).toFixed(i?1:0)} ${units[i]}`}
+  function formatReduction(before,after){if(!before)return'';const pct=((before-after)/before)*100;return pct>=0?`${pct.toFixed(1)}% 감소`:`${Math.abs(pct).toFixed(1)}% 증가`}
+  function escapeHtml(str){return str.replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]))}
+})();
 </script>
 </body>
 </html>
